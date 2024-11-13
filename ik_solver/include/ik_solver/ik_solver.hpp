@@ -32,6 +32,8 @@ class IKSolver : public rclcpp::Node
         KDL::JntArray jnt_state_current_;
         KDL::Frame ee_pose_target_;
 
+        std::vector<KDL::JntArray> all_solutions;
+
         std::thread solve_ik_thread_;
 
         std::string urdf_xml_;

@@ -9,7 +9,7 @@
 
 IKSolver::IKSolver() : Node("iksolver")
 {
-    this->declare_parameter<double>("timeout", 0.005);
+    this->declare_parameter<double>("timeout", 0.01);
     this->declare_parameter<double>("epsilon", 1e-5);
     this->declare_parameters<std::string>(
         std::string(),
@@ -86,7 +86,7 @@ void IKSolver::ee_pose_target_callback(const geometry_msgs::msg::Pose::SharedPtr
     // update target_ee_pose_
     std::lock_guard<std::mutex> guard(solve_ik_mutex_);
     // msg -> KDL::Frame
-    KDL::Vector position(msg->position.x / 1000.0, msg->position.y / 1000.0, msg->position.z / 1000.0);
+    KDL::Vector position(msg->position.x, msg->position.y, msg->position.z);
 
     double x = msg->orientation.x;
     double y = msg->orientation.y;
@@ -170,11 +170,29 @@ void IKSolver::solve_ik()
                 }
 
                 jnt_state_result_pub_->publish(joint_state_msg);
+
+                tracik_solver_->getSolutions(all_solutions);
             }
 
             else
             {
                 RCLCPP_ERROR(this->get_logger(), "IK solution failed");
+            }
+
+            for (size_t i = 0; i < all_solutions.size(); ++i)
+            {
+                std::ostringstream oss;
+                oss << "Solution " << i + 1 << ": [";
+                for (size_t j = 0; j < all_solutions[i].data.size(); ++j)
+                {
+                    oss << all_solutions[i](j) / M_PI * 180.0;
+                    if (j < all_solutions[i].data.size() - 1)
+                    {
+                        oss << ", ";
+                    }
+                }
+                oss << "]";
+                RCLCPP_INFO(this->get_logger(), "%s", oss.str().c_str());
             }
         }
 

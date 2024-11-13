@@ -22,7 +22,7 @@ def generate_launch_description():
         [
             DeclareLaunchArgument('chain_start', default_value='link_base'),
             DeclareLaunchArgument('chain_end', default_value='link7'),
-            DeclareLaunchArgument('timeout', default_value='0.005'),
+            DeclareLaunchArgument('timeout', default_value='0.01'),
             DeclareLaunchArgument('epsilon', default_value='0.00005'),
             Node(
                 package='ik_solver',
